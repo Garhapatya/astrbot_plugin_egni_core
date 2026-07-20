@@ -1,5 +1,13 @@
 {
     "enable": {
-        "tcgame": true
+        "type": "object",
+        "description": "Feature switches for Egni Core.",
+        "items": {
+            "tcgame": {
+                "type": "bool",
+                "description": "Enable Thaumcraft game image generation.",
+                "default": true
+            }
+        }
     }
 }
