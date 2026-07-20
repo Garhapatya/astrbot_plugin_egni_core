@@ -4,5 +4,4 @@ desc: 支持与提供qq机器人Egni-个性化服务的核心插件
 version: v1.0.0 
 author: Garhapatya 
 repo: https://github.com/Garhapatya/astrbot_plugin_egni_core.git 
-support_platforms:
-  - QQ
+
