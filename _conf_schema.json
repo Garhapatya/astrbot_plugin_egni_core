@@ -14,9 +14,9 @@
                 "default": 0.4
             },
             "blacklist": {
-                "type": "string",
+                "type": "list",
                 "description": "填入群号过滤",
-                "default": "",
+                "default": [],
                 "editor_mode": true
             }
 
