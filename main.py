@@ -3,6 +3,10 @@ from astrbot.api.star import Context, Star, register
 from astrbot.api import AstrBotConfig
 from astrbot.api import logger
 from typing import Any
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from src.chat.repeat import RepeatHandler
 
