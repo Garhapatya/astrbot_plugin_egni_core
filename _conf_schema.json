@@ -16,8 +16,7 @@
             "blacklist": {
                 "type": "list",
                 "description": "填入群号过滤",
-                "default": [],
-                "editor_mode": true
+                "default": []
             }
 
         }
