@@ -49,11 +49,8 @@ class EgniCore(Star):
     async def add_blacklist(self, event: AstrMessageEvent):
         """将当前群添加到复读黑名单"""
         group_id = event.get_group_id()
-        if not self.repeat_handler.is_blacklisted(group_id):
-            self.config.repeat["blacklist"].append(group_id)
-            self.repeat_handler.new_config(self.config.repeat)
-            self.config.save_config() 
-
+        if self.repeat_handler.add_blacklist(group_id):
+            self.config.save_config()
             yield event.plain_result(f"已将群 {group_id} 添加到复读黑名单。")
         else:
             yield event.plain_result(f"群 {group_id} 已在复读黑名单中。")
@@ -62,11 +59,8 @@ class EgniCore(Star):
     async def remove_blacklist(self, event: AstrMessageEvent):
         """从复读黑名单中移除当前群"""
         group_id = event.get_group_id()
-        if self.repeat_handler.is_blacklisted(group_id):
-            self.config.repeat["blacklist"].remove(group_id)
-            self.repeat_handler.new_config(self.config.repeat)
+        if self.repeat_handler.remove_blacklist(group_id):
             self.config.save_config()
-
             yield event.plain_result(f"已将群 {group_id} 从复读黑名单中移除。")
         else:
             yield event.plain_result(f"群 {group_id} 不在复读黑名单中。")

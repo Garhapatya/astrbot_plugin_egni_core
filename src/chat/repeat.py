@@ -24,9 +24,22 @@ class RepeatHandler:
             or self.is_blacklisted(group_id)
         )
     
-    def new_config(self, config: dict[str, Any]):
-        """更新配置"""
-        self.config = config
+
+    def add_blacklist(self, group_id: str) -> bool:
+        """将群号加入黑名单。返回 True 表示新增，False 表示已存在。"""
+        blacklist = self.config.setdefault("blacklist", [])
+        if group_id in blacklist:
+            return False
+        blacklist.append(group_id)
+        return True
+
+    def remove_blacklist(self, group_id: str) -> bool:
+        """将群号移出黑名单。返回 True 表示移除成功，False 表示不在黑名单中。"""
+        blacklist = self.config.get("blacklist", [])
+        if group_id not in blacklist:
+            return False
+        blacklist.remove(group_id)
+        return True
 
     def should_repeat(self, group_id: str, message: Any) -> bool:
         """判断是否应该复读本条消息。如果返回 True，外部应当 yield 复读消息。"""
