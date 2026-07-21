@@ -14,7 +14,7 @@ class EgniCore(Star):
         super().__init__(context)
         self.config: Any = config
 
-    repeat_memory = {}
+
 
     async def initialize(self):
         self.repeat_blacklist = await self.get_kv_data("repeat_blacklist", []) 
@@ -24,6 +24,7 @@ class EgniCore(Star):
         pass
 
 
+    repeat_memory = {}
     @filter.event_message_type(filter.EventMessageType.GROUP_MESSAGE)
     async def repeat(self, event: AstrMessageEvent):
         """自动跟风复读群友消息"""
@@ -31,12 +32,11 @@ class EgniCore(Star):
         if not self.config.repeat.get("enable") or event.get_group_id() in self.config.repeat.get("blacklist", []):
             return
 
-        message = event.get_message_outline()
+        message = event.get_messages()
         group_id = event.get_group_id()
 
         if (
             group_id not in self.repeat_memory
-            or "[转发消息]" in message
             or self.repeat_memory[group_id]["previous_message"] != message
         ):
             self.repeat_memory[group_id] = {"count": 0, "previous_message": message}
@@ -46,7 +46,7 @@ class EgniCore(Star):
             self.repeat_memory[group_id]["count"] += 1
 
         if random.random() < self.repeat_memory[group_id]["count"] * self.config.repeat.get("probability", 0.4):
-            yield event.chain_result(event.get_messages())
+            yield event.chain_result(message)
             self.repeat_memory[group_id]["count"] = -1
  
 
