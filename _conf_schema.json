@@ -9,7 +9,7 @@
                 "default": true
             },
             "probability": {
-                "type": "number",
+                "type": "float",
                 "description": "步进复读概率，初始为0，每次重复后概率增加，达到1时必定复读",
                 "default": 0.4
             },
