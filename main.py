@@ -28,7 +28,8 @@ class EgniCore(Star):
     async def repeat(self, event: AstrMessageEvent):
         """自动跟风复读群友消息"""
 
-        if not self.config.repeat.enable or event.get_group_id() in self.config.repeat.blacklist: return    
+        if not self.config.repeat.get("enable") or event.get_group_id() in self.config.repeat.get("blacklist", []):
+            return
 
         message = event.get_message_outline()
         group_id = event.get_group_id()
@@ -44,7 +45,7 @@ class EgniCore(Star):
         else:
             self.repeat_memory[group_id]["count"] += 1
 
-        if random.random() < self.repeat_memory[group_id]["count"] * self.config.repeat.probability:
+        if random.random() < self.repeat_memory[group_id]["count"] * self.config.repeat.get("probability", 0.4):
             yield event.chain_result(event.get_messages())
             self.repeat_memory[group_id]["count"] = -1
  
