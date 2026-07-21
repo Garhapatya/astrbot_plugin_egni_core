@@ -4,9 +4,8 @@ from astrbot.api import AstrBotConfig
 from astrbot.api import logger
 from typing import Any
 
-
-
-from .src.chat.repeat import RepeatHandler
+from .src.chat import RepeatHandler
+from .src.ygo import *
 
 
 @register("egni_core", "Garhapatya", "支持与提供qq机器人Egni-个性化服务的核心插件", "1.0.0")
@@ -34,7 +33,7 @@ class EgniCore(Star):
         message = event.get_messages()
         if self.repeat_handler.should_repeat(event.get_group_id(), message):
             yield event.chain_result(message)
- 
+
 
     @filter.command_group("repeat")
     @filter.permission_type(filter.PermissionType.ADMIN)

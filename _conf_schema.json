@@ -20,5 +20,26 @@
             }
 
         }
+    },
+    "ygo": {
+        "type": "object",
+        "description": "ygo助手",
+        "items": {
+            "CDNurl": {
+                "type": "string",
+                "description": "卡图CDN地址, 使用{code}作为卡密占位符，不填写默认加在末尾",
+                "default": "https://cdn.233.momobako.com/ygopro/pics/{code}.jpg"
+            },
+            "CardInfoUrl": {
+                "type": "string",
+                "description": "卡查API地址, 使用{code}作为卡密占位符，不填写默认加在末尾",
+                "default": "https://ygocdb.com/api/v0/card/{code}"
+            },
+            "SearchUrl": {
+                "type": "string",
+                "description": "卡片搜索API地址",
+                "default": "https://ygocdb.com/api/v0/"
+            }
+        }
     }
 }

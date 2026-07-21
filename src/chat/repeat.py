@@ -19,11 +19,7 @@ class RepeatHandler:
 
     def is_blocked(self, group_id: str) -> bool:
         """是否因开关关闭或群号在黑名单中而禁止复读。"""
-        return (
-            not self.is_enabled()
-            or self.is_blacklisted(group_id)
-        )
-    
+        return not self.is_enabled() or self.is_blacklisted(group_id)
 
     def add_blacklist(self, group_id: str) -> bool:
         """将群号加入黑名单。返回 True 表示新增，False 表示已存在。"""
