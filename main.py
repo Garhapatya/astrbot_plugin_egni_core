@@ -74,6 +74,9 @@ class EgniCore(Star):
                 event.get_messages()
                 yield
                 count = -1  
+            else :
+                yield
+
 
             if not self.setting.repeat.enable or event.get_group_id() in self.setting.repeat.blacklist: return  
 
