@@ -35,7 +35,7 @@ class EgniCore(Star):
         if self.repeat_handler.should_repeat(event.get_group_id(), message):
             yield event.chain_result(message)
  
-
+    @filter.permission_type(filter.PermissionType.ADMIN)
     @filter.command_group("repeat")
     def repeat_command():
         pass
@@ -51,7 +51,7 @@ class EgniCore(Star):
         if not self.repeat_handler.is_blacklisted(group_id):
             self.config.repeat["blacklist"].append(group_id)
             self.repeat_handler.new_config(self.config.repeat)
-            await self.config.save_config_async() 
+            self.config.save_config() 
 
             yield event.plain_result(f"已将群 {group_id} 添加到复读黑名单。")
         else:
@@ -64,7 +64,7 @@ class EgniCore(Star):
         if self.repeat_handler.is_blacklisted(group_id):
             self.config.repeat["blacklist"].remove(group_id)
             self.repeat_handler.new_config(self.config.repeat)
-            await self.config.save_config_async()
+            self.config.save_config()
 
             yield event.plain_result(f"已将群 {group_id} 从复读黑名单中移除。")
         else:
