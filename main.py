@@ -35,8 +35,9 @@ class EgniCore(Star):
         if self.repeat_handler.should_repeat(event.get_group_id(), message):
             yield event.chain_result(message)
  
-    @filter.permission_type(filter.PermissionType.ADMIN)
+
     @filter.command_group("repeat")
+    @filter.permission_type(filter.PermissionType.ADMIN)
     def repeat_command():
         pass
 
