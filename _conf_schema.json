@@ -1,13 +1,24 @@
 {
-    "enable": {
+    "repeat": {
         "type": "object",
-        "description": "Feature switches for Egni Core.",
+        "description": "复读功能配置",
         "items": {
-            "tcgame": {
+            "enable": {
                 "type": "bool",
-                "description": "Enable Thaumcraft game image generation.",
+                "description": "群聊复读开关",
                 "default": true
+            },
+            "probability": {
+                "type": "number",
+                "description": "步进复读概率，初始为0，每次重复后概率增加，达到1时必定复读",
+                "default": 0.4
+            },
+            "blacklist": {
+                "type": "array",
+                "description": "填入群号过滤",
+                "default": []
             }
+
         }
     }
 }
