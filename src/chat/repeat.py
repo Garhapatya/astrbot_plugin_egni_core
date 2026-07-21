@@ -9,12 +9,24 @@ class RepeatHandler:
         self.memory: dict[str, dict] = {}
         self.config = config
 
+    def is_enabled(self) -> bool:
+        """是否因开关关闭而禁止复读。"""
+        return self.config.get("enable", True)
+
+    def is_blacklisted(self, group_id: str) -> bool:
+        """是否因群号在黑名单中而禁止复读。"""
+        return group_id in self.config.get("blacklist", [])
+
     def is_blocked(self, group_id: str) -> bool:
         """是否因开关关闭或群号在黑名单中而禁止复读。"""
         return (
-            not self.config.get("enable", True)
-            or group_id in self.config.get("blacklist", [])
+            not self.is_enabled()
+            or self.is_blacklisted(group_id)
         )
+    
+    def new_config(self, config: dict[str, Any]):
+        """更新配置"""
+        self.config = config
 
     def should_repeat(self, group_id: str, message: Any) -> bool:
         """判断是否应该复读本条消息。如果返回 True，外部应当 yield 复读消息。"""
