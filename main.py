@@ -71,7 +71,9 @@ class EgniCore(Star):
 
 
     @filter.command("打印卡组")
-    def print_deck(self, event: AstrMessageEvent, url: str):
+    def print_deck(self, event: AstrMessageEvent):
+        """从 ourygo 分享 URL 生成卡组 PDF"""
+        url = event.get_message_str().split(' ')[-1]
         deck = DeckHandle.from_ourygo_url(url)
         yield event.plain_result("生成中…")
         pdf_bytes = PdfGenerator.generate_deck_pdf(deck, (self.plugin_data_path / "temp.pdf").as_posix(), self.config.ygo.get("cdn_url", "https://cdn.233.momobako.com/ygopro/pics/{code}.jpg"))
