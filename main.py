@@ -78,16 +78,17 @@ class EgniCore(Star):
         deck = DeckHandle.from_ourygo_url(url)
         yield event.plain_result("生成中…")
 
-        output_path = get_astrbot_temp_path() 
+
+        pdf_path = get_astrbot_temp_path() + f"/{deck.name}.pdf"
         cdn = self.config.get("module").get("ygo").get("CDNurl")
 
         try:
-            pdf_bytes = PdfGenerator.generate_deck_pdf(deck, output_path + f"/{deck.name}.pdf", cdn)
+            pdf_bytes = PdfGenerator.generate_deck_pdf(deck, pdf_path, cdn)
         except Exception as e:
             logger.error(f"print_deck: PDF generation failed: {e}\n{traceback.format_exc()}")
             yield event.plain_result("生成 PDF 失败，请检查日志。")
             return
 
-        pdf_file = Comp.File(file=output_path, name=f"{deck.name}.pdf")
+        pdf_file = Comp.File(file=pdf_path, name=f"{deck.name}.pdf")
 
         yield event.chain_result([pdf_file])
