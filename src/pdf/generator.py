@@ -159,7 +159,7 @@ class PdfGenerator:
         deck: Deck,
         output_path: str,
         cdn_url: str = "https://cdn.233.momobako.com/ygopro/pics/{code}.jpg",
-    ) -> str:
+    ) -> bytes:
         """为完整的 **卡组** 生成多页 A4 PDF，每页 9 张卡片。
 
         卡牌顺序遵循 YDK 惯例：主卡组 → 额外卡组 → 副卡组。
@@ -175,7 +175,7 @@ class PdfGenerator:
             cdn_url: CDN 地址模板，``{code}`` 会被替换为卡片密码。
 
         Returns:
-            生成 PDF 的绝对路径。
+            PDF 文件字节流。
         """
         PdfGenerator._ensure_fpdf()
         assert FPDF is not None
@@ -215,12 +215,15 @@ class PdfGenerator:
                     else:
                         PdfGenerator._draw_card_placeholder(pdf, x, y, card.code)
 
+            buf = pdf.buffer
+            assert buf is not None
+            pdf_bytes = bytes(buf)
             os.makedirs(os.path.dirname(output_path) or ".", exist_ok=True)
             pdf.output(output_path)
         finally:
             _clean_temp_dir(temp_dir)
 
-        return os.path.abspath(output_path)
+        return pdf_bytes
 
 
 def _clean_temp_dir(temp_dir: str) -> None:

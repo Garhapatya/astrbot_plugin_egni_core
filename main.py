@@ -12,6 +12,7 @@ from .src.chat import RepeatHandler
 from .src.ygo import *
 from .src.pdf import PdfGenerator
 
+import base64
 
 @register("egni_core", "Garhapatya", "支持与提供qq机器人Egni-个性化服务的核心插件", "1.0.0")
 class EgniCore(Star):
@@ -86,12 +87,13 @@ class EgniCore(Star):
 
         logger.info(f"print_deck: generating PDF -> {output_path}")
         try:
-            PdfGenerator.generate_deck_pdf(deck, output_path, cdn)
+            pdf_bytes = PdfGenerator.generate_deck_pdf(deck, output_path, cdn)
         except Exception as e:
             logger.error(f"print_deck: PDF generation failed: {e}")
             yield event.plain_result("生成 PDF 失败，请检查日志。")
             return
 
         logger.info(f"print_deck: PDF generated successfully, {deck.total_cards} cards, sending...")
-        file = Comp.File(file=output_path, name=f"{deck.name}.pdf")
+        b64 = base64.b64encode(pdf_bytes).decode()
+        file = Comp.File(file=f"base64://{b64}", name=f"{deck.name}.pdf")
         yield event.chain_result([file])
