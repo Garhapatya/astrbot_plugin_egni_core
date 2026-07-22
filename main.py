@@ -88,13 +88,11 @@ class EgniCore(Star):
             yield event.plain_result("生成 PDF 失败，请检查日志。")
             return
 
-
+        pdf_file = Comp.File(file=output_path, name=f"{deck.name}.pdf")
 
         docker_path = self.config.get("docker", {}).get("path", "")
-        if docker_path:
-            send_path = str(Path(docker_path) / Path(output_path).relative_to("/AstrBot/data")/ f"{deck.name}.pdf") 
-        else:
-            send_path = output_path
-        logger.info(f"print_deck: PDF generated successfully, {deck.total_cards} cards, sending...")
-        yield event.chain_result([Comp.File(file=send_path, name=f"{deck.name}.pdf")])
-        logger.info(f"print_deck: PDF sent successfully")
+        if len(docker_path):
+            send_path = str(Path(docker_path) / Path(output_path).relative_to("/AstrBot/data")) 
+            pdf_file.file=send_path
+            
+        yield event.chain_result([])
