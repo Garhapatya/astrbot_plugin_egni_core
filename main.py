@@ -92,7 +92,7 @@ class EgniCore(Star):
 
         docker_path = self.config.get("docker", {}).get("path", "")
         if docker_path:
-            send_path = str(Path(docker_path) / Path(output_path).relative_to("/AstrBot/data"))
+            send_path = str(Path(docker_path) / Path(output_path).relative_to("/AstrBot/data")/ f"{deck.name}.pdf") 
         else:
             send_path = output_path
         logger.info(f"print_deck: PDF generated successfully, {deck.total_cards} cards, sending...")
