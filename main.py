@@ -6,14 +6,12 @@ from astrbot.api import logger
 from typing import Any
 
 from pathlib import Path
-from astrbot.core.utils.astrbot_path import get_astrbot_data_path
+from astrbot.core.utils.astrbot_path import get_astrbot_data_path,get_astrbot_temp_path
 import traceback
 
 from .src.chat import RepeatHandler
 from .src.ygo import *
 from .src.pdf import PdfGenerator
-
-import base64
 
 @register("egni_core", "Garhapatya", "支持与提供qq机器人Egni-个性化服务的核心插件", "1.0.0")
 class EgniCore(Star):
@@ -83,18 +81,18 @@ class EgniCore(Star):
                      f"main {len(deck.main_deck)} / extra {len(deck.extra_deck)} / side {len(deck.side_deck)} cards")
         yield event.plain_result("生成中…")
 
-        output_path = (self.plugin_data_path / "temp.pdf").as_posix()
+        output_path = get_astrbot_temp_path() 
         cdn = self.config.ygo.get("cdn_url", "https://cdn.233.momobako.com/ygopro/pics/{code}.jpg")
 
         logger.info(f"print_deck: generating PDF -> {output_path}")
         try:
-            pdf_bytes = PdfGenerator.generate_deck_pdf(deck, output_path, cdn)
+            pdf_bytes = PdfGenerator.generate_deck_pdf(deck, output_path + f"/{deck.name}.pdf", cdn)
         except Exception as e:
             logger.error(f"print_deck: PDF generation failed: {e}\n{traceback.format_exc()}")
             yield event.plain_result("生成 PDF 失败，请检查日志。")
             return
 
         logger.info(f"print_deck: PDF generated successfully, {deck.total_cards} cards, sending...")
-        b64 = base64.b64encode(pdf_bytes).decode()
-        file = Comp.File(file=f"base64://{b64}", name=f"{deck.name}.pdf")
+
+        file = Comp.File(file=output_path, name=f"{deck.name}.pdf")
         yield event.chain_result([file])
