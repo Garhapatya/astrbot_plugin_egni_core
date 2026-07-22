@@ -93,6 +93,6 @@ class EgniCore(Star):
         docker_path = self.config.get("docker", {}).get("path", "")
         if len(docker_path):
             send_path = str(Path(docker_path) / Path(output_path).relative_to("/AstrBot/data")) 
-            pdf_file.file=send_path
+            pdf_file.file_=send_path
             
         yield event.chain_result([])
