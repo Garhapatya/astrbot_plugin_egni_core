@@ -70,7 +70,7 @@ class EgniCore(Star):
             yield event.plain_result(f"群 {group_id} 不在复读黑名单中。")
 
 
-    @filter.command("打印卡组")
+    @filter.command("prdeck",alias=["打印卡组"])
     async def print_deck(self, event: AstrMessageEvent):
         """从 ourygo 分享 URL 生成卡组 PDF"""
         url = event.get_message_str().split(' ')[-1]
