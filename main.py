@@ -95,4 +95,5 @@ class EgniCore(Star):
         logger.info(f"print_deck: PDF generated successfully, {deck.total_cards} cards, sending...")
 
         yield event.send(MessageEventResult([Comp.File(file=output_path, name=f"{deck.name}.pdf")]))
-
+        logger.info(f"print_deck: PDF sent successfully, cleaning up...")
+        
