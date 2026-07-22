@@ -74,17 +74,13 @@ class EgniCore(Star):
     async def print_deck(self, event: AstrMessageEvent, url: str):
         """从 ourygo 分享 URL 生成卡组 PDF"""
 
-        logger.info(f"print_deck: decoding deck URL: {url}")
-        deck = DeckHandle.from_ourygo_url(url)
 
-        logger.info(f"print_deck: decoded deck '{deck.name}' — "
-                     f"main {len(deck.main_deck)} / extra {len(deck.extra_deck)} / side {len(deck.side_deck)} cards")
+        deck = DeckHandle.from_ourygo_url(url)
         yield event.plain_result("生成中…")
 
         output_path = get_astrbot_temp_path() 
         cdn = self.config.ygo.get("cdn_url", "https://cdn.233.momobako.com/ygopro/pics/{code}.jpg")
 
-        logger.info(f"print_deck: generating PDF -> {output_path}")
         try:
             pdf_bytes = PdfGenerator.generate_deck_pdf(deck, output_path + f"/{deck.name}.pdf", cdn)
         except Exception as e:
@@ -92,8 +88,14 @@ class EgniCore(Star):
             yield event.plain_result("生成 PDF 失败，请检查日志。")
             return
 
-        logger.info(f"print_deck: PDF generated successfully, {deck.total_cards} cards, sending...")
 
-        yield event.send(MessageEventResult([Comp.File(file=output_path, name=f"{deck.name}.pdf")]))
-        logger.info(f"print_deck: PDF sent successfully, cleaning up...")
-        
+
+        docker_path = self.config.docker.get("path", "")
+        if docker_path:
+            # Path 自动处理尾部有无 /，以及路径拼接
+            send_path = str(Path(docker_path) / Path(output_path).relative_to("/AstrBot/data"))
+        else:
+            send_path = output_path
+        logger.info(f"print_deck: PDF generated successfully, {deck.total_cards} cards, sending...")
+        yield event.chain_result([Comp.File(file=send_path, name=f"{deck.name}.pdf")])
+        logger.info(f"print_deck: PDF sent successfully")

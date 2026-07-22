@@ -1,45 +1,63 @@
-{
-    "repeat": {
+{   
+    "docker": {
         "type": "object",
-        "description": "复读功能配置",
+        "description": "宿主机data路径（非docker部署无需填写）",
         "items": {
-            "enable": {
-                "type": "bool",
-                "description": "群聊复读开关",
-                "default": true
-            },
-            "probability": {
-                "type": "float",
-                "description": "步进复读概率，初始为0，每次重复后概率增加，达到1时必定复读",
-                "default": 0.3
-            },
-            "blacklist": {
-                "type": "list",
-                "description": "填入群号过滤",
-                "default": []
+            "path": {
+                "type": "string",
+                "description": "data路径",
+                "default": "~/astrbot/data"
             }
-
         }
     },
-    "ygo": {
+    "module": {
         "type": "object",
-        "description": "ygo助手",
+        "description": "子模块配置",
         "items": {
-            "CDNurl": {
-                "type": "string",
-                "description": "卡图CDN地址, 使用{code}作为卡密占位符，不填写默认加在末尾",
-                "default": "https://cdn.233.momobako.com/ygopro/pics/{code}.jpg"
-            },
-            "CardInfoUrl": {
-                "type": "string",
-                "description": "卡查API地址, 使用{code}作为卡密占位符，不填写默认加在末尾",
-                "default": "https://ygocdb.com/api/v0/card/{code}"
-            },
-            "SearchUrl": {
-                "type": "string",
-                "description": "卡片搜索API地址",
-                "default": "https://ygocdb.com/api/v0/"
-            }
+            "repeat": {
+                    "type": "object",
+                    "description": "复读功能配置",
+                    "items": {
+                        "enable": {
+                            "type": "bool",
+                            "description": "群聊复读开关",
+                            "default": true
+                        },
+                        "probability": {
+                            "type": "float",
+                            "description": "步进复读概率，初始为0，每次重复后概率增加，达到1时必定复读",
+                            "default": 0.3
+                        },
+                        "blacklist": {
+                            "type": "list",
+                            "description": "填入群号过滤",
+                            "default": []
+                        }
+
+                    }
+                },
+                "ygo": {
+                    "type": "object",
+                    "description": "ygo助手",
+                    "items": {
+                        "CDNurl": {
+                            "type": "string",
+                            "description": "卡图CDN地址, 使用{code}作为卡密占位符，不填写默认加在末尾",
+                            "default": "https://cdn.233.momobako.com/ygopro/pics/{code}.jpg"
+                        },
+                        "CardInfoUrl": {
+                            "type": "string",
+                            "description": "卡查API地址, 使用{code}作为卡密占位符，不填写默认加在末尾",
+                            "default": "https://ygocdb.com/api/v0/card/{code}"
+                        },
+                        "SearchUrl": {
+                            "type": "string",
+                            "description": "卡片搜索API地址",
+                            "default": "https://ygocdb.com/api/v0/"
+                        }
+                    }
+                }
         }
     }
+    
 }

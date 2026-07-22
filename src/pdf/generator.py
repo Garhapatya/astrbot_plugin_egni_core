@@ -86,7 +86,7 @@ class PdfGenerator:
         for i, card in enumerate(cards):
             try:
                 img_bytes = PdfGenerator.download_card_image(card.code, cdn_url)
-                tmp = os.path.join(temp_dir, f"{i}.jpg")
+                tmp = os.path.join(temp_dir, f"{i}_{card.code}.jpg")
                 with open(tmp, "wb") as f:
                     f.write(img_bytes)
                 paths.append(tmp)
@@ -199,6 +199,8 @@ class PdfGenerator:
                 pdf.add_page()
 
                 for idx, (card, img_path) in enumerate(zip(page_cards, image_paths)):
+                    if img_path is not None and not os.path.exists(img_path):
+                        img_path = None
                     row = idx // COLS
                     col = idx % COLS
                     x = MARGIN_H_MM + col * CARD_WIDTH_MM
