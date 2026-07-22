@@ -112,7 +112,6 @@ class PdfGenerator:
         cards: list[Card],
         output_path: str,
         cdn_url: str = "https://cdn.233.momobako.com/ygopro/pics/{code}.jpg",
-        title: str = "",
     ) -> str:
         """生成单页 A4 PDF，卡图按 3×3 网格排版。
 
@@ -120,7 +119,6 @@ class PdfGenerator:
             cards: 最多 9 张卡片，超出的条目被静默忽略。
             output_path: PDF 文件保存路径。
             cdn_url: 卡图 CDN 地址模板。
-            title: 可选标题，显示在页面顶部。
 
         Returns:
             生成 PDF 的绝对路径。
@@ -137,11 +135,6 @@ class PdfGenerator:
                 page_cards, cdn_url, temp_dir
             )
             pdf.add_page()
-
-            if title:
-                pdf.set_font("Helvetica", size=14)
-                pdf.set_xy(0, 5)
-                pdf.cell(A4_WIDTH_MM, 10, title, align="C")
 
             for idx, (card, img_path) in enumerate(zip(page_cards, image_paths)):
                 row = idx // COLS
@@ -203,11 +196,6 @@ class PdfGenerator:
                 )
 
                 pdf.add_page()
-
-                if deck.name and page_start == 0:
-                    pdf.set_font("Helvetica", size=14)
-                    pdf.set_xy(0, 5)
-                    pdf.cell(A4_WIDTH_MM, 10, deck.name, align="C")
 
                 for idx, (card, img_path) in enumerate(zip(page_cards, image_paths)):
                     row = idx // COLS
