@@ -71,16 +71,27 @@ class EgniCore(Star):
 
 
     @filter.command("prdeck", alias={"打印卡组"})
-    async def print_deck(self, event: AstrMessageEvent):
+    async def print_deck(self, event: AstrMessageEvent, url: str):
         """从 ourygo 分享 URL 生成卡组 PDF"""
-        url = event.get_message_str().split(' ')[-1]
+
+        logger.info(f"print_deck: decoding deck URL: {url}")
         deck = DeckHandle.from_ourygo_url(url)
+
+        logger.info(f"print_deck: decoded deck '{deck.name}' — "
+                     f"main {len(deck.main_deck)} / extra {len(deck.extra_deck)} / side {len(deck.side_deck)} cards")
         yield event.plain_result("生成中…")
-        pdf_bytes = PdfGenerator.generate_deck_pdf(deck, (self.plugin_data_path / "temp.pdf").as_posix(), self.config.ygo.get("cdn_url", "https://cdn.233.momobako.com/ygopro/pics/{code}.jpg"))
-        if pdf_bytes is None:
-            file = Comp.File(file=(self.plugin_data_path / "temp.pdf").as_posix(), name=f"{deck.name}.pdf")
 
-            yield event.chain_result([file])
+        output_path = (self.plugin_data_path / "temp.pdf").as_posix()
+        cdn = self.config.ygo.get("cdn_url", "https://cdn.233.momobako.com/ygopro/pics/{code}.jpg")
 
-        else:
+        logger.info(f"print_deck: generating PDF -> {output_path}")
+        try:
+            PdfGenerator.generate_deck_pdf(deck, output_path, cdn)
+        except Exception as e:
+            logger.error(f"print_deck: PDF generation failed: {e}")
             yield event.plain_result("生成 PDF 失败，请检查日志。")
+            return
+
+        logger.info(f"print_deck: PDF generated successfully, {deck.total_cards} cards, sending...")
+        file = Comp.File(file=output_path, name=f"{deck.name}.pdf")
+        yield event.chain_result([file])
