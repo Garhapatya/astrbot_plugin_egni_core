@@ -1,15 +1,4 @@
 {   
-    "docker": {
-        "type": "object",
-        "description": "宿主机data路径（非docker部署无需填写）",
-        "items": {
-            "path": {
-                "type": "string",
-                "description": "data路径",
-                "default": "~/astrbot/data"
-            }
-        }
-    },
     "module": {
         "type": "object",
         "description": "子模块配置",
