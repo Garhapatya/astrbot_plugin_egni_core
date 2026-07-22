@@ -18,7 +18,7 @@ class EgniCore(Star):
     def __init__(self, context: Context, config: AstrBotConfig):
         super().__init__(context)
         self.config: Any = config
-        self.repeat_handler = RepeatHandler(self.config.repeat)
+        self.repeat_handler = RepeatHandler(self.config.module.repeat)
         self.plugin_data_path = Path(get_astrbot_data_path()) / "plugin_data" / self.name
 
     async def initialize(self):
@@ -79,7 +79,7 @@ class EgniCore(Star):
         yield event.plain_result("生成中…")
 
         output_path = get_astrbot_temp_path() 
-        cdn = self.config.ygo.get("cdn_url", "https://cdn.233.momobako.com/ygopro/pics/{code}.jpg")
+        cdn = self.config.module.ygo.get("cdn_url", "https://cdn.233.momobako.com/ygopro/pics/{code}.jpg")
 
         try:
             pdf_bytes = PdfGenerator.generate_deck_pdf(deck, output_path + f"/{deck.name}.pdf", cdn)
@@ -92,7 +92,6 @@ class EgniCore(Star):
 
         docker_path = self.config.docker.get("path", "")
         if docker_path:
-            # Path 自动处理尾部有无 /，以及路径拼接
             send_path = str(Path(docker_path) / Path(output_path).relative_to("/AstrBot/data"))
         else:
             send_path = output_path
