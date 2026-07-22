@@ -78,7 +78,6 @@ class EgniCore(Star):
         deck = DeckHandle.from_ourygo_url(url)
         yield event.plain_result("生成中…")
 
-
         pdf_path = get_astrbot_temp_path() + f"/{deck.name}.pdf"
         cdn = self.config.get("module").get("ygo").get("CDNurl")
 
