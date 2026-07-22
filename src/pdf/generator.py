@@ -215,11 +215,10 @@ class PdfGenerator:
                     else:
                         PdfGenerator._draw_card_placeholder(pdf, x, y, card.code)
 
-            buf = pdf.buffer
-            assert buf is not None
-            pdf_bytes = bytes(buf)
             os.makedirs(os.path.dirname(output_path) or ".", exist_ok=True)
             pdf.output(output_path)
+            with open(output_path, "rb") as f:
+                pdf_bytes = f.read()
         finally:
             _clean_temp_dir(temp_dir)
 
