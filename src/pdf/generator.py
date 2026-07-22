@@ -147,6 +147,7 @@ class PdfGenerator:
                 else:
                     PdfGenerator._draw_card_placeholder(pdf, x, y, card.code)
 
+            os.makedirs(os.path.dirname(output_path) or ".", exist_ok=True)
             pdf.output(output_path)
         finally:
             _clean_temp_dir(temp_dir)
@@ -214,6 +215,7 @@ class PdfGenerator:
                     else:
                         PdfGenerator._draw_card_placeholder(pdf, x, y, card.code)
 
+            os.makedirs(os.path.dirname(output_path) or ".", exist_ok=True)
             pdf.output(output_path)
         finally:
             _clean_temp_dir(temp_dir)
