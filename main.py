@@ -75,6 +75,8 @@ class EgniCore(Star):
         deck = DeckHandle.from_ourygo_url(url)
         pdf_bytes = PdfGenerator.generate_deck_pdf(deck, (self.plugin_data_path / "temp.pdf").as_posix(), self.config.ygo.get("cdn_url", "https://cdn.233.momobako.com/ygopro/pics/{code}.jpg"))
         if pdf_bytes is None:
-            yield Comp.File(file=(self.plugin_data_path / "temp.pdf").as_posix(), name=f"{deck.name}.pdf")
+            file = Comp.File(file=(self.plugin_data_path / "temp.pdf").as_posix(), name=f"{deck.name}.pdf")
+            yield event.chain_result([file])
+
         else:
             yield event.plain_result("生成 PDF 失败，请检查日志。")
