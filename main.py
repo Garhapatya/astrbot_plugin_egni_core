@@ -1,11 +1,16 @@
 from astrbot.api.event import filter, AstrMessageEvent, MessageEventResult
+import astrbot.api.message_components as Comp
 from astrbot.api.star import Context, Star, register
 from astrbot.api import AstrBotConfig
 from astrbot.api import logger
 from typing import Any
 
+from pathlib import Path
+from astrbot.core.utils.astrbot_path import get_astrbot_data_path
+
 from .src.chat import RepeatHandler
 from .src.ygo import *
+from .src.pdf import PdfGenerator
 
 
 @register("egni_core", "Garhapatya", "支持与提供qq机器人Egni-个性化服务的核心插件", "1.0.0")
@@ -14,7 +19,7 @@ class EgniCore(Star):
         super().__init__(context)
         self.config: Any = config
         self.repeat_handler = RepeatHandler(self.config.repeat)
-
+        self.plugin_data_path = Path(get_astrbot_data_path()) / "plugin_data" / self.name
 
     async def initialize(self):
         self.repeat_blacklist = await self.get_kv_data("repeat_blacklist", [])
@@ -65,4 +70,11 @@ class EgniCore(Star):
             yield event.plain_result(f"群 {group_id} 不在复读黑名单中。")
 
 
-
+    @filter.command("打印卡组")
+    def print_deck(self, event: AstrMessageEvent, url: str):
+        deck = DeckHandle.from_ourygo_url(url)
+        pdf_bytes = PdfGenerator.generate_deck_pdf(deck, (self.plugin_data_path / "temp.pdf").as_posix(), self.config.ygo.get("cdn_url", "https://cdn.233.momobako.com/ygopro/pics/{code}.jpg"))
+        if pdf_bytes is None:
+            yield Comp.File(file=(self.plugin_data_path / "temp.pdf").as_posix(), name=f"{deck.name}.pdf")
+        else:
+            yield event.plain_result("生成 PDF 失败，请检查日志。")
