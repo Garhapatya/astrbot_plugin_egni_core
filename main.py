@@ -90,5 +90,4 @@ class EgniCore(Star):
             return
 
         pdf_file = Comp.File(file=pdf_path, name=f"{deck.name}.pdf")
-
         yield event.chain_result([pdf_file])
