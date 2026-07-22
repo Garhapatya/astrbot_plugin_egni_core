@@ -94,5 +94,5 @@ class EgniCore(Star):
         if len(docker_path):
             send_path = str(Path(docker_path) / Path(output_path).relative_to("/AstrBot/data")) 
             pdf_file.file_=send_path
-        if event.platform_meta.name == "aiocqhttp":
-            yield event.chain_result([pdf_file])
+
+        yield event.chain_result([pdf_file])
