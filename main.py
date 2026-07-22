@@ -71,7 +71,7 @@ class EgniCore(Star):
 
 
     @filter.command("打印卡组")
-    def print_deck(self, event: AstrMessageEvent):
+    async def print_deck(self, event: AstrMessageEvent):
         """从 ourygo 分享 URL 生成卡组 PDF"""
         url = event.get_message_str().split(' ')[-1]
         deck = DeckHandle.from_ourygo_url(url)
