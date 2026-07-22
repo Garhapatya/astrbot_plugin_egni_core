@@ -56,7 +56,7 @@ class PdfGenerator:
     @staticmethod
     def download_card_image(
         code: int,
-        cdn_url: str = "https://cdn.233.momobako.com/ygopro/pics/{code}.jpg",
+        cdn_url: str,
     ) -> bytes:
         """从 CDN 下载单张卡图的 JPEG 字节流。
 
@@ -111,7 +111,7 @@ class PdfGenerator:
     def generate_card_page(
         cards: list[Card],
         output_path: str,
-        cdn_url: str = "https://cdn.233.momobako.com/ygopro/pics/{code}.jpg",
+        cdn_url: str,
     ) -> str:
         """生成单页 A4 PDF，卡图按 3×3 网格排版。
 
@@ -158,7 +158,7 @@ class PdfGenerator:
     def generate_deck_pdf(
         deck: Deck,
         output_path: str,
-        cdn_url: str = "https://cdn.233.momobako.com/ygopro/pics/{code}.jpg",
+        cdn_url: str,
     ) -> bytes:
         """为完整的 **卡组** 生成多页 A4 PDF，每页 9 张卡片。
 
