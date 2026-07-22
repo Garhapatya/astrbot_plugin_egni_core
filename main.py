@@ -79,7 +79,7 @@ class EgniCore(Star):
         yield event.plain_result("生成中…")
 
         output_path = get_astrbot_temp_path() 
-        cdn = self.config.get("module").get("ygo").get("cdn_url")
+        cdn = self.config.get("module").get("ygo").get("CDNurl")
 
         try:
             pdf_bytes = PdfGenerator.generate_deck_pdf(deck, output_path + f"/{deck.name}.pdf", cdn)
@@ -94,5 +94,5 @@ class EgniCore(Star):
         if len(docker_path):
             send_path = str(Path(docker_path) / Path(output_path).relative_to("/AstrBot/data")) 
             pdf_file.file_=send_path
-            
-        yield event.chain_result([])
+        if event.platform_meta.name == "aiocqhttp":
+            yield event.chain_result([pdf_file])
