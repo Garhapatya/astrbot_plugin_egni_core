@@ -67,7 +67,7 @@ class PriorityGet:
     """超先行 YPK 包管理。
 
     读取 ``{data_path}/priority.json``，其中：
-    - ``yrp_ver``: 最近一次下载的超先行 YPK 版本号。
+    - ``ypk_ver``: 最近一次下载的超先行 YPK 版本号。
     - ``cards``: 需要优先更新的卡片 code 列表。
 
     Args:
@@ -76,17 +76,17 @@ class PriorityGet:
     """
 
     def __init__(self, data_path: str, temp_path: str) -> None:
-        self.work_dir = data_path.strip("/") + "/priority"
+        self.work_dir = data_path.rstrip("/") + "/priority"
         self.temp_path = temp_path
         self.version: str = ""
         self.cards: list[str] = []
 
-        config_path = data_path.strip("/") + "/priority.json"
+        config_path = data_path.rstrip("/") + "/priority.json"
         if os.path.exists(config_path):
             try:
                 with open(config_path, "r", encoding="utf-8") as f:
                     raw = json.load(f)
-                self.version = raw.get("yrp_ver", "")
+                self.version = raw.get("ypk_ver", "")
                 self.cards = raw.get("cards", [])
             except (json.JSONDecodeError, OSError):
                 pass
@@ -193,10 +193,10 @@ class PriorityGet:
         # 解压 YPK 文件
         new_cards = []
         try:
-            with zipfile.ZipFile(ypk_path, "r") as yrp:
-                for file in yrp.namelist():
+            with zipfile.ZipFile(ypk_path, "r") as ypk:
+                for file in ypk.namelist():
                     if file.startswith("pics/") and file.endswith(".jpg") and file.count("/") == 1:
-                        yrp.extract(file, self.work_dir)
+                        ypk.extract(file, self.work_dir)
                         code = file.split("/")[1].replace(".jpg", "")
                         new_cards.append(code)
 
@@ -206,7 +206,7 @@ class PriorityGet:
         # 更新记录
         try:
             with open(os.path.join(self.work_dir, "priority.json"), "w", encoding="utf-8") as f:
-                json.dump({"yrp_ver": latest_ver, "cards": new_cards}, f, ensure_ascii=False, indent=4)
+                json.dump({"ypk_ver": latest_ver, "cards": new_cards}, f, ensure_ascii=False, indent=4)
         except Exception:
             pass # 写入失败
         self.version = latest_ver
