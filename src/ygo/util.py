@@ -161,7 +161,6 @@ class PriorityGet:
 
             return await asyncio.to_thread(_download)
         except Exception:
-            print("Failed to download YPK from %s", url)
             return None
 
     async def update_priority(self, is_force: bool = False) -> str | None:
