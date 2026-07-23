@@ -76,12 +76,12 @@ class PriorityGet:
     """
 
     def __init__(self, data_path: str, temp_path: str) -> None:
-        self.work_dir = data_path.rstrip("/") + "/priority"
+        self.work_dir = os.path.join(data_path, "priority")
         self.temp_path = temp_path
         self.version: str = ""
         self.cards: list[str] = []
 
-        config_path = data_path.rstrip("/") + "/priority.json"
+        config_path = os.path.join(data_path, "priority.json")
         if os.path.exists(config_path):
             try:
                 with open(config_path, "r", encoding="utf-8") as f:
