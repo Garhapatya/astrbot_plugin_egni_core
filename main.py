@@ -27,6 +27,7 @@ class EgniCore(Star):
 
     async def initialize(self):
         await self.deck_handle.priority.update_priority()
+        logger.info("EgniCore plugin initialized successfully.")
 
 
 
