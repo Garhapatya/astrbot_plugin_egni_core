@@ -152,7 +152,7 @@ class PriorityGet:
                     )
                 },
             )
-            resp = request.urlopen(req, timeout=30)
+            resp = request.urlopen(req, timeout=300)
             with open(save_path, "wb") as f:
                 f.write(resp.read())
             return save_path
