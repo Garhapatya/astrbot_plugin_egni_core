@@ -41,7 +41,7 @@
                         },
                         "SearchUrl": {
                             "type": "string",
-                            "description": "卡片搜索API地址",
+                            "description": "百鸽API地址",
                             "default": "https://ygocdb.com/api/v0/"
                         }
                     }

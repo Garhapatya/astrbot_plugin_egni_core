@@ -1,28 +1,33 @@
-from astrbot.api.event import filter, AstrMessageEvent, MessageEventResult
-import astrbot.api.message_components as Comp
-from astrbot.api.star import Context, Star, register
-from astrbot.api import AstrBotConfig
-from astrbot.api import logger
+import traceback
+from pathlib import Path
 from typing import Any
 
-from pathlib import Path
-from astrbot.core.utils.astrbot_path import get_astrbot_data_path,get_astrbot_temp_path
-import traceback
+import astrbot.api.message_components as Comp
+from astrbot.api import AstrBotConfig, logger
+from astrbot.api.event import AstrMessageEvent, filter
+from astrbot.api.star import Context, Star, register
+from astrbot.core.utils.astrbot_path import get_astrbot_data_path, get_astrbot_temp_path
 
 from .src.chat import RepeatHandler
-from .src.ygo import *
 from .src.pdf import PdfGenerator
+from .src.ygo import *
+
+import apscheduler
 
 @register("egni_core", "Garhapatya", "支持与提供qq机器人Egni-个性化服务的核心插件", "1.0.0")
 class EgniCore(Star):
     def __init__(self, context: Context, config: AstrBotConfig):
         super().__init__(context)
+        self.plugin_data_path = Path(get_astrbot_data_path()) / "plugin_data" / self.name
+        self.plugin_temp_path = Path(get_astrbot_temp_path()) / "plugin_temp" / self.name
+        
         self.config: Any = config
         self.repeat_handler = RepeatHandler(self.config.get("module").get("repeat"))
-        self.plugin_data_path = Path(get_astrbot_data_path()) / "plugin_data" / self.name
+        self.deck_handle = DeckHandle(self.config.get("module").get("ygo"), str(self.plugin_data_path), str(self.plugin_temp_path))
 
     async def initialize(self):
-        self.repeat_blacklist = await self.get_kv_data("repeat_blacklist", [])
+        await self.deck_handle.priority.update_priority()
+
 
 
     async def terminate(self):
@@ -75,14 +80,17 @@ class EgniCore(Star):
         """从 ourygo 分享 URL 生成卡组 PDF"""
 
 
-        deck = DeckHandle.from_ourygo_url(url)
+        deck = self.deck_handle.from_ourygo_url(url)
         yield event.plain_result("生成中…")
 
         pdf_path = get_astrbot_temp_path() + f"/{deck.name}.pdf"
         cdn = self.config.get("module").get("ygo").get("CDNurl")
 
+        
         try:
-            pdf_bytes = PdfGenerator.generate_deck_pdf(deck, pdf_path, cdn)
+            pdf = PdfGenerator(self.deck_handle)
+            pdf.embed_deck(deck)
+            pdf.save_pdf(pdf_path)
         except Exception as e:
             logger.error(f"print_deck: PDF generation failed: {e}\n{traceback.format_exc()}")
             yield event.plain_result("生成 PDF 失败，请检查日志。")
@@ -90,3 +98,18 @@ class EgniCore(Star):
 
         pdf_file = Comp.File(file=pdf_path, name=f"{deck.name}.pdf")
         yield event.chain_result([pdf_file])
+
+    @filter.command("重载超先行卡图")
+    async def reload_priority(self, event: AstrMessageEvent):
+        """重新加载超先行卡图"""
+        yield event.plain_result("正在重新加载超先行卡图…")
+        try:
+            await self.deck_handle.priority.update_priority()
+
+        except Exception as e:
+            logger.error(f"reload_priority: Failed to update priority: {e}\n{traceback.format_exc()}")
+            yield event.plain_result("重新加载超先行卡图失败，请检查日志。")
+            return
+        yield event.plain_result("已重新加载超先行卡图。")
+
+    
