@@ -1,3 +1,4 @@
+import asyncio
 import base64
 import json
 import os
@@ -143,19 +144,22 @@ class PriorityGet:
         fname = url.split("/")[-1]
         save_path = os.path.join(self.temp_path, fname)
         try:
-            req = request.Request(
-                url,
-                headers={
-                    "User-Agent": (
-                        "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
-                        " AppleWebKit/537.36"
-                    )
-                },
-            )
-            resp = request.urlopen(req, timeout=300)
-            with open(save_path, "wb") as f:
-                f.write(resp.read())
-            return save_path
+            def _download() -> str:
+                req = request.Request(
+                    url,
+                    headers={
+                        "User-Agent": (
+                            "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+                            " AppleWebKit/537.36"
+                        )
+                    },
+                )
+                resp = request.urlopen(req, timeout=300)
+                with open(save_path, "wb") as f:
+                    f.write(resp.read())
+                return save_path
+
+            return await asyncio.to_thread(_download)
         except Exception:
             return None
 
