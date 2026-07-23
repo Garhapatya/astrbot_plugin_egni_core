@@ -94,7 +94,7 @@ class PdfGenerator:
             page_cards = flat[page_start : page_start + CARDS_PER_PAGE]
             image_paths: list[str | None] = []
             for card in page_cards:
-                image_paths.append(self.deck_handle.fetch_card_image_path(card.code))
+                image_paths.append(self.deck_handle.fetch_card_image_path(card))
 
             self.pdf.add_page()
 

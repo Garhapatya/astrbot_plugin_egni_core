@@ -1,8 +1,7 @@
 import base64
 import json
 import os
-import urllib.parse
-import urllib.request
+from urllib import parse,request
 import zipfile
 from dataclasses import dataclass
 from typing import Callable
@@ -12,14 +11,21 @@ from typing import Callable
 class Card:
     """一张卡的数据。"""
 
-    def __init__(self, code: str, count: int = 1, image_url: str = ""):
+    def __init__(self, code: str, count: int = 1, path: str = ""):
         self.code = code
         self.count = count
-        self.image_url = image_url
+        self.image = path
 
     def __repr__(self) -> str:
         return f"Card(code={self.code}, count={self.count})"
 
+    
+    def image_is_url(self,) -> bool:
+        """判断卡图路径是否为 URL。"""
+        try:
+            return parse.urlsplit(self.image).scheme.lower() == "file"
+        except ValueError:
+            return False
 
 @dataclass
 class Deck:
@@ -53,8 +59,6 @@ class Deck:
             f"extra={len(self.extra_deck)} positions, "
             f"side={len(self.side_deck)} positions)"
         )
-
-
 
 
 
@@ -102,14 +106,14 @@ class PriorityGet:
         url = (
             "https://cdntx.moecube.com/ygopro-super-pre/data/latest-tag.txt"
         )
-        req = urllib.request.Request(
+        req = request.Request(
             url,
             headers={
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
             },
         )
         try:
-            resp = urllib.request.urlopen(req, timeout=10)
+            resp = request.urlopen(req, timeout=10)
             text = resp.read().decode("utf-8").strip()
             if text.endswith(".ypk"):
                 return text
@@ -139,7 +143,7 @@ class PriorityGet:
         fname = url.split("/")[-1]
         save_path = os.path.join(self.temp_path, fname)
         try:
-            req = urllib.request.Request(
+            req = request.Request(
                 url,
                 headers={
                     "User-Agent": (
@@ -148,7 +152,7 @@ class PriorityGet:
                     )
                 },
             )
-            resp = urllib.request.urlopen(req, timeout=30)
+            resp = request.urlopen(req, timeout=30)
             with open(save_path, "wb") as f:
                 f.write(resp.read())
             return save_path
@@ -248,10 +252,10 @@ class DeckHandle:
         """
         从 ourygo 分享 URL 解码出卡组。
         """
-        parsed = urllib.parse.urlparse(url)
-        params = urllib.parse.parse_qs(parsed.query)
+        parsed = parse.urlparse(url)
+        params = parse.parse_qs(parsed.query)
 
-        name = urllib.parse.unquote(params.get("name", [""])[0])
+        name = parse.unquote(params.get("name", [""])[0])
         d_param = params.get("d", [""])[0]
         if not d_param:
             raise ValueError("URL 中缺少 d 参数 (卡组数据)。")
@@ -316,7 +320,7 @@ class DeckHandle:
                 lines.append(str(card.code))
         return "\n".join(lines)
 
-    def fetch_card_image_bytes(self, code: str) -> bytes:
+    def fetch_card_image_bytes(self, url: str) -> bytes:
         """从 CDN 下载卡图 jpg 字节流。
 
         Args:
@@ -325,14 +329,14 @@ class DeckHandle:
         Returns:
             JPEG 图片的原始字节。
         """
-        url = self.cdn_url(code)
-        req = urllib.request.Request(
+
+        req = request.Request(
             url, headers={"User-Agent": "AstrBot-EgniCore/1.0"}
         )
-        resp = urllib.request.urlopen(req, timeout=15)
+        resp = request.urlopen(req, timeout=15)
         return resp.read()
 
-    def fetch_card_image_path(self, code: str, dl_path: str | None = None) -> str:
+    def fetch_card_image_path(self, card: Card, dl_path: str | None = None) -> str:
         """从 CDN 下载卡图到本地。
 
         Args:
@@ -341,13 +345,16 @@ class DeckHandle:
         Returns:
             本地卡图文件的路径。
         """
+        if not card.image_is_url():
+            return card.image
+            
         if dl_path is None:
             image_path = self.temp_path
         else:
             image_path = dl_path
-        img_bytes = self.fetch_card_image_bytes(code)
+        img_bytes = self.fetch_card_image_bytes(card.image)
         os.makedirs(image_path, exist_ok=True)
-        tmp = os.path.join(image_path, f"{code}.jpg")
+        tmp = os.path.join(image_path, card.code + ".jpg")
         if not os.path.exists(tmp) or dl_path:
             with open(tmp, "wb") as f:
                 f.write(img_bytes)
@@ -364,10 +371,10 @@ class DeckHandle:
         """
         try:
             url = self.card_info_url(code)
-            req = urllib.request.Request(
+            req = request.Request(
                 url, headers={"User-Agent": "AstrBot-EgniCore/1.0"}
             )
-            resp = urllib.request.urlopen(req, timeout=15)
+            resp = request.urlopen(req, timeout=15)
             data = json.loads(resp.read())
             return data["text"]["name"]
         except Exception:
@@ -385,10 +392,10 @@ class DeckHandle:
         """
         try:
             url = self.card_info_url(code)
-            req = urllib.request.Request(
+            req = request.Request(
                 url, headers={"User-Agent": "AstrBot-EgniCore/1.0"}
             )
-            resp = urllib.request.urlopen(req, timeout=15)
+            resp = request.urlopen(req, timeout=15)
             return json.loads(resp.read())
         except Exception:
             return None
@@ -406,12 +413,12 @@ class DeckHandle:
         """
         try:
             url = self.search_url.rstrip("/") + "/"
-            params = urllib.parse.urlencode({"search": query, "start": start})
-            req = urllib.request.Request(
+            params = parse.urlencode({"search": query, "start": start})
+            req = request.Request(
                 url + "?" + params,
                 headers={"User-Agent": "AstrBot-EgniCore/1.0"},
             )
-            resp = urllib.request.urlopen(req, timeout=15)
+            resp = request.urlopen(req, timeout=15)
             data = json.loads(resp.read())
             return data.get("result", [])
         except Exception:
