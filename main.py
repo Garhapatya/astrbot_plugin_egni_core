@@ -27,7 +27,7 @@ class EgniCore(Star):
 
     async def initialize(self):
         await self.deck_handle.priority.update_priority()
-        logger.info("EgniCore plugin initialized successfully.")
+        logger.info(f"Update priority successfully. The priority.json file is in {self.deck_handle.priority.work_dir}.")
 
 
 
