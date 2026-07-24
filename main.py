@@ -59,7 +59,7 @@ class EgniCore(Star):
                             ),
                     line,
                 )
-                plain += line
+                plain += line + "\n"
 
         chain.append(Comp.Plain(plain))
 
