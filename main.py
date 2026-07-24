@@ -36,28 +36,27 @@ class EgniCore(Star):
     # ── base tool ────────────────────────────────────────────────────────
 
     def trans_json_to_chain(self, datas: dict) -> list[Comp.BaseMessageComponent]:
-        flat = {}
+
         chain = []
         plain = ""
 
-        for name, value in datas.items():
-            if isinstance(value, dict):
-                for n, v in value.items():
-                    flat[f"{name}.{n}"] = v
-            else:
-                flat[name] = value
-
-        for template_line in self.config.get("module").get("ygo").get("search_return"):
+        for template_line in self.config["module"]["ygo"]["search_return"]:
             line = template_line
             if "${IMAGE}" in line:
                 chain.append(Comp.Plain(plain))
-                code = str(flat.get("code", 0))
+                code = str(datas["code"])
                 chain.append(Comp.Image.fromURL(self.deck_handle.get_image_path(code)))
                 plain = ""
             else:
                 line = re.sub(
                     r'\$\{([^}]+)\}',
-                    lambda m: str(flat.get(m.group(1), m.group(0))) if m.group(1) in flat else "",
+                    lambda m: str(
+                                datas[m.group(1)]
+                                if m.group(1) in datas
+                                else datas[m.group(1).split(".")[0]][m.group(1).split(".")[1]]
+                                if "." in m.group(1)
+                                else ""
+                            ),
                     line,
                 )
                 plain += line
