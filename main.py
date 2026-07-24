@@ -13,7 +13,7 @@ from .src.pdf import PdfGenerator
 from .src.ygo import *
 
 import apscheduler
-import string
+import re
 
 @register("egni_core", "Garhapatya", "支持与提供qq机器人Egni-个性化服务的核心插件", "1.0.0")
 class EgniCore(Star):
@@ -37,6 +37,9 @@ class EgniCore(Star):
 
     def trans_json_to_chain(self, datas: dict) -> list[Comp.BaseMessageComponent]:
         flat = {}
+        chain = []
+        plain = ""
+
         for name, value in datas.items():
             if isinstance(value, dict):
                 for n, v in value.items():
@@ -44,21 +47,23 @@ class EgniCore(Star):
             else:
                 flat[name] = value
 
-        chain=[]
-        plain=""
-        for line in self.config.get("module").get("ygo").get("search_return"):
-            try:
-                line = string.Template(line).substitute(**flat)
-                plain += line + "\n"
-            except KeyError:
-                if "${IMAGE}" in line:
-                    chain.append(Comp.Plain(plain))
-                    code:str = str(flat.get("code", 0))
-                    chain.append(Comp.Image.fromURL(self.deck_handle.get_image_path(code)))
-                    plain=""
-                else:
-                    line = ""
+        for template_line in self.config.get("module").get("ygo").get("search_return"):
+            line = template_line
+            if "${IMAGE}" in line:
+                chain.append(Comp.Plain(plain))
+                code = str(flat.get("code", 0))
+                chain.append(Comp.Image.fromURL(self.deck_handle.get_image_path(code)))
+                plain = ""
+            else:
+                line = re.sub(
+                    r'\$\{([^}]+)\}',
+                    lambda m: str(flat.get(m.group(1), m.group(0))) if m.group(1) in flat else "",
+                    line,
+                )
+                plain += line
+
         chain.append(Comp.Plain(plain))
+
         return chain
 
 
