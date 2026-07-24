@@ -221,6 +221,7 @@ class DeckHandle:
 
         self.cdn_url: Callable[[str], str] = url_template(config.get("CDNurl", ""))
         self.card_info_url: Callable[[str], str] = url_template(config.get("CardInfoUrl", ""))
+        self.pro_cdn_url: Callable[[str], str] = url_template(config.get("proCNDurl", ""))
 
         self.search_url: str = config.get("SearchUrl", "")
         self.data_path = data_path
@@ -312,15 +313,21 @@ class DeckHandle:
         """从 CDN 下载卡图到本地"""
         if not card.image_is_url():
             return card.image
-            
         if dl_path is None:
             image_path = self.temp_path
         else:
             image_path = dl_path
-        img_bytes = self.fetch_card_image_bytes(card.image)
+
         os.makedirs(image_path, exist_ok=True)
         tmp = os.path.join(image_path, card.code + ".jpg")
         if not os.path.exists(tmp) or dl_path:
+            try:
+                img_bytes = self.fetch_card_image_bytes(card.image)
+            except (request.HTTPError, OSError):
+            
+                img_bytes = self.fetch_card_image_bytes(self.pro_cdn_url(card.code))
+            
+                
             with open(tmp, "wb") as f:
                 f.write(img_bytes)
         return tmp

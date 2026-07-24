@@ -32,7 +32,7 @@
                         "CDNurl": {
                             "type": "string",
                             "description": "卡图CDN地址",
-                            "hint": "使用{code}作为卡密占位符，不填写默认加在末尾",
+                            "hint": "使用{code}作为卡密占位符，不填写默认加在末尾\n默认：https://cdn.233.momobako.com/ygopro/pics/{code}.jpg\n日文：https://cdn.233.momobako.com/ygoimg/jp/{code}.webp\n英文：https://cdn.233.momobako.com/ygoimg/en/{code}.webp\n官方中文：https://cdn.233.momobako.com/ygoimg/sc/{code}.webp\nYGOPRO：https://cdn.233.momobako.com/ygoimg/ygopro/{code}.webp\n",
                             "default": "https://cdn.233.momobako.com/ygopro/pics/{code}.jpg"
                         },
                         "CardInfoUrl": {
@@ -45,6 +45,12 @@
                             "type": "string",
                             "description": "百鸽API地址",
                             "default": "https://ygocdb.com/api/v0/"
+                        },
+                        "proCNDurl": {
+                            "type": "string",
+                            "description": "超先行卡图cdn地址",
+                            "hint": "使用{code}作为卡密占位符，不填写默认加在末尾",
+                            "default": "https://cdntx.moecube.com/ygopro-super-pre/data/pics/{code}.jpg"
                         },
                         "search_return":{
                             "type":"list",

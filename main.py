@@ -44,9 +44,13 @@ class EgniCore(Star):
             line = template_line
             if "${IMAGE}" in line:
                 chain.append(Comp.Plain(plain))
-                code = str(datas.get("id", "0"))
-                chain.append(Comp.Image.fromURL(self.deck_handle.cdn_url(code)))
                 plain = ""
+                code = str(datas.get("id", "0"))
+                card = Card(code=code, path=self.deck_handle.cdn_url(code))
+                try:
+                    chain.append(Comp.Image.fromFileSystem(self.deck_handle.fetch_card_image_path(card)))
+                except Exception as e:
+                    plain += f"[图片加载失败: {code}]\n"
             else:
                 line = re.sub(
                     r'\$\{([^}]+)\}',
