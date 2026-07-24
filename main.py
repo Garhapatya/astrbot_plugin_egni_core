@@ -13,6 +13,7 @@ from .src.pdf import PdfGenerator
 from .src.ygo import *
 
 import apscheduler
+import string
 
 @register("egni_core", "Garhapatya", "支持与提供qq机器人Egni-个性化服务的核心插件", "1.0.0")
 class EgniCore(Star):
@@ -28,11 +29,40 @@ class EgniCore(Star):
     async def initialize(self):
         await self.deck_handle.priority.update_priority()
 
-
-
     async def terminate(self):
         pass
 
+
+    # ── base tool ────────────────────────────────────────────────────────
+
+    def trans_json_to_chain(self, datas: dict) -> list[Comp.BaseMessageComponent]:
+        flat = {}
+        for name, value in datas.items():
+            if isinstance(value, dict):
+                for n, v in value.items():
+                    flat[f"{name}.{n}"] = v
+            else:
+                flat[name] = value
+
+        chain=[]
+        plain=""
+        for line in self.config.get("module").get("ygo").get("search_return"):
+            try:
+                line = string.Template(line).substitute(**flat)
+                plain += line + "\n"
+            except KeyError:
+                if "${IMAGE}" in line:
+                    chain.append(Comp.Plain(plain))
+                    code:str = str(flat.get("code", 0))
+                    chain.append(Comp.Image.fromURL(self.deck_handle.get_image_path(code)))
+                    plain=""
+                else:
+                    line = ""
+        chain.append(Comp.Plain(plain))
+        return chain
+
+
+    # ── chat ─────────────────────────────────────────────────────────────
 
     @filter.event_message_type(filter.EventMessageType.GROUP_MESSAGE)
     async def repeat(self, event: AstrMessageEvent):
@@ -75,7 +105,9 @@ class EgniCore(Star):
             yield event.plain_result(f"群 {group_id} 不在复读黑名单中。")
 
 
-    @filter.command("prdeck", alias={"打印卡组"})
+    # ── ygo ─────────────────────────────────────────────────────────────
+
+    @filter.command("打印卡组")
     async def print_deck(self, event: AstrMessageEvent, url: str):
         """从 ourygo 分享 URL 生成卡组 PDF"""
 
@@ -112,4 +144,12 @@ class EgniCore(Star):
             return
         yield event.plain_result("已重新加载超先行卡图。")
 
-    
+    @filter.command("查卡")
+    async def search_card(self, event: AstrMessageEvent, input: str):
+        """查询卡片信息"""
+        result,weight = self.deck_handle.search_cards(input)
+        if not result:
+            yield event.plain_result("未找到匹配的卡片。")
+            return
+        yield event.chain_result(self.trans_json_to_chain(result[0]))
+        

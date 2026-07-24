@@ -31,18 +31,38 @@
                     "items": {
                         "CDNurl": {
                             "type": "string",
-                            "description": "卡图CDN地址, 使用{code}作为卡密占位符，不填写默认加在末尾",
+                            "description": "卡图CDN地址",
+                            "hint": "使用{code}作为卡密占位符，不填写默认加在末尾",
                             "default": "https://cdn.233.momobako.com/ygopro/pics/{code}.jpg"
                         },
                         "CardInfoUrl": {
                             "type": "string",
-                            "description": "卡查API地址, 使用{code}作为卡密占位符，不填写默认加在末尾",
+                            "description": "卡查API地址",
+                            "hint": "使用{code}作为卡密占位符，不填写默认加在末尾",
                             "default": "https://ygocdb.com/api/v0/card/{code}"
                         },
                         "SearchUrl": {
                             "type": "string",
                             "description": "百鸽API地址",
                             "default": "https://ygocdb.com/api/v0/"
+                        },
+                        "search_return":{
+                            "type":"list",
+                            "description":"查卡功能输出的字段",
+                            "default": [
+                                "卡密：${id}",
+                                "YGOPRO译名：${cn_name}",
+                                "简中官方译名：${sc_name}",
+                                "Master Duel译名：${md_name}",
+                                "NWBBS译名：${nwbbs_name}:",
+                                "CNOCG译名：${cnocg_n}:",
+                                "日文名：${jp_name}(${jp_ruby})",
+                                "${IMAGE}",
+                                "${text.types}",
+                                "${text.pdesc}",
+                                "${text.desc}"
+                            ],
+                            "invisible": true
                         }
                     }
                 }

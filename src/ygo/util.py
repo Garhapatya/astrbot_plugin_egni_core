@@ -205,7 +205,6 @@ class PriorityGet:
 class DeckHandle:
     """卡组编解码器与数据获取。"""
 
-
     def __init__(
         self,
         config: dict,
@@ -366,17 +365,8 @@ class DeckHandle:
         except Exception:
             return None
 
-    def search_cards(self, query: str, start: int = 0) -> list[dict]:
-        """通过百鸽 API 搜索卡片。
-
-        Args:
-            query: 搜索关键词（卡名、效果文本、密码、cid 等）。
-            start: 结果偏移量，用于分页，默认 0。
-
-        Returns:
-            搜索结果列表，每项包含 id, cid, cn_name, text, data 等字段，
-            API 不可用时返回空列表。
-        """
+    def search_cards(self, query: str, start: int = 0) -> tuple[list[dict], int]:
+        """通过百鸽 API 搜索卡片"""
         try:
             url = self.search_url.rstrip("/") + "/"
             params = parse.urlencode({"search": query, "start": start})
@@ -386,8 +376,8 @@ class DeckHandle:
             )
             resp = request.urlopen(req, timeout=15)
             data = json.loads(resp.read())
-            return data.get("result", [])
+            return data.get("result", []), data.get("next")
         except Exception:
-            return []
+            return [], 0
 
 

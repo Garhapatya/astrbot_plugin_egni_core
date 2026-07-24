@@ -29,9 +29,7 @@ MARGIN_V_MM = (A4_HEIGHT_MM - ROWS * CARD_HEIGHT_MM) / 2  # 15 mm
 
 
 class PdfGenerator:
-    """YGO 打印 PDF 生成器。
-    使用实例生命周期管理临时文件。
-    """
+    """YGO 打印 PDF 生成器"""
 
     PDF_UNIT = "mm"
 
@@ -64,7 +62,7 @@ class PdfGenerator:
         self,
         deck: Deck,
     ) -> None:
-        """为完整的 **卡组** 生成多页 A4 PDF，每页 9 张卡片"""
+        """将卡组嵌入PDF，每页3×3卡图网格。"""
 
 
         # 按 count 展开为平坦列表
