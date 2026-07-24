@@ -45,7 +45,7 @@ class EgniCore(Star):
             if "${IMAGE}" in line:
                 chain.append(Comp.Plain(plain))
                 code = str(datas.get("id", "0"))
-                chain.append(Comp.Image.fromURL(self.deck_handle.get_image_path(code)))
+                chain.append(Comp.Image.fromURL(self.deck_handle.cdn_url(code)))
                 plain = ""
             else:
                 line = re.sub(
