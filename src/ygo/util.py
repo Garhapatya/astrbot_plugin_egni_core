@@ -64,16 +64,7 @@ class Deck:
 
 
 class PriorityGet:
-    """超先行 YPK 包管理。
-
-    读取 ``{data_path}/priority.json``，其中：
-    - ``ypk_ver``: 最近一次下载的超先行 YPK 版本号。
-    - ``cards``: 需要优先更新的卡片 code 列表。
-
-    Args:
-        data_path: AstrBot 数据目录路径。
-        temp_path: 临时文件目录路径。
-    """
+    """超先行卡资源管理"""
 
     def __init__(self, data_path: str, temp_path: str) -> None:
         self.work_dir = os.path.join(data_path, "priority")
@@ -92,8 +83,7 @@ class PriorityGet:
                 pass
             
     def get_image(self, code: str) -> str | None:
-        """获取超先行 YPK 中的卡图路径。
-        """
+        """获取超先行 YPK 中的卡图路径"""
         if code not in self.cards:
             return None
         img_path = os.path.join(self.work_dir, f"pics/{code}.jpg")
@@ -103,7 +93,7 @@ class PriorityGet:
             return None
     
     def fetch_superpre_ypk_url(self) -> str | None:
-        """获取最新 MC 超先行 YPK 补丁下载地址。"""
+        """获取最新 MC 超先行 YPK 补丁下载地址"""
         url = (
             "https://cdntx.moecube.com/ygopro-super-pre/data/latest-tag.txt"
         )
@@ -123,9 +113,7 @@ class PriorityGet:
             return None
 
     def ver_check(self) -> tuple[str, str] | None:
-        """
-        检查本地 YPK 版本是否过期。
-        """
+        """检查YPK版本是否更新"""
         url = self.fetch_superpre_ypk_url()
         if not url:
             return None
@@ -138,8 +126,7 @@ class PriorityGet:
             return None
 
     async def download(self, url: str) -> str | None:
-        """下载 YPK 文件到本地。
-        """
+        """下载YPK文件到本地"""
         os.makedirs(self.temp_path, exist_ok=True)
         fname = url.split("/")[-1]
         save_path = os.path.join(self.temp_path, fname)
@@ -216,9 +203,7 @@ class PriorityGet:
     
 
 class DeckHandle:
-    """
-    卡组编解码器与数据获取。
-    """
+    """卡组编解码器与数据获取。"""
 
 
     def __init__(
@@ -245,7 +230,7 @@ class DeckHandle:
         self.priority = PriorityGet(self.data_path, self.temp_path)
 
     def get_image_path(self, code: str) -> str:
-        """获取卡图路径，优先使用超先行 YPK 中的图片。"""
+        """获取卡图路径，优先使用超先行YPK中的图片。"""
         img_path = self.priority.get_image(code)
         if img_path is None:
             img_path = self.cdn_url(code)
@@ -253,9 +238,7 @@ class DeckHandle:
 
 
     def from_ourygo_url(self, url: str) -> Deck:
-        """
-        从 ourygo 分享 URL 解码出卡组。
-        """
+        """从分享卡组码连接解码出卡组"""
         parsed = parse.urlparse(url)
         params = parse.parse_qs(parsed.query)
 
@@ -302,14 +285,7 @@ class DeckHandle:
 
     @staticmethod
     def to_ydk(deck: Deck) -> str:
-        """将卡组导出为 ydk 格式文本。
-
-        Args:
-            deck: Deck 对象。
-
-        Returns:
-            ydk 格式字符串，可直接保存为 .ydk 文件。
-        """
+        """将卡组导出为 ydk 格式文本"""
         lines = ["#created by AstrBot Egni Core", "#main"]
         for card in deck.main_deck:
             for _ in range(card.count):
@@ -325,14 +301,7 @@ class DeckHandle:
         return "\n".join(lines)
 
     def fetch_card_image_bytes(self, url: str) -> bytes:
-        """从 CDN 下载卡图 jpg 字节流。
-
-        Args:
-            code: 卡片 passcode。
-
-        Returns:
-            JPEG 图片的原始字节。
-        """
+        """从 CDN 下载卡图 jpg 字节流"""
 
         req = request.Request(
             url, headers={"User-Agent": "AstrBot-EgniCore/1.0"}
@@ -341,14 +310,7 @@ class DeckHandle:
         return resp.read()
 
     def fetch_card_image_path(self, card: Card, dl_path: str | None = None) -> str:
-        """从 CDN 下载卡图到本地。
-
-        Args:
-            code: 卡片 passcode。
-
-        Returns:
-            本地卡图文件的路径。
-        """
+        """从 CDN 下载卡图到本地"""
         if not card.image_is_url():
             return card.image
             

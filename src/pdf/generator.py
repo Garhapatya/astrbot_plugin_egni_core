@@ -64,22 +64,7 @@ class PdfGenerator:
         self,
         deck: Deck,
     ) -> None:
-        """为完整的 **卡组** 生成多页 A4 PDF，每页 9 张卡片。
-
-        卡牌顺序遵循 YDK 惯例：主卡组 → 额外卡组 → 副卡组。
-
-        ``count > 1`` 的卡会重复占位，使每张实体卡都有独立卡位。
-
-        每张卡图为 62 × 89 mm（标准 YGO 卡片尺寸），
-        每页居中排布 3 × 3 网格。
-
-        Args:
-            deck: 待渲染的卡组。
-            output_path: 输出 PDF 文件路径。
-
-        Returns:
-            None
-        """
+        """为完整的 **卡组** 生成多页 A4 PDF，每页 9 张卡片"""
 
 
         # 按 count 展开为平坦列表
