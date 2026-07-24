@@ -22,9 +22,9 @@ class Card:
 
     
     def image_is_url(self,) -> bool:
-        """判断卡图路径是否为 URL。"""
+        """判断卡图路径是否为远程 URL（需要下载）。"""
         try:
-            return parse.urlsplit(self.image).scheme.lower() == "file"
+            return parse.urlsplit(self.image).scheme.lower() in ("http", "https")
         except ValueError:
             return False
 
@@ -324,10 +324,7 @@ class DeckHandle:
             try:
                 img_bytes = self.fetch_card_image_bytes(card.image)
             except (request.HTTPError, OSError):
-            
                 img_bytes = self.fetch_card_image_bytes(self.pro_cdn_url(card.code))
-            
-                
             with open(tmp, "wb") as f:
                 f.write(img_bytes)
         return tmp
