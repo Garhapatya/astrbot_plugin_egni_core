@@ -2,6 +2,7 @@ import asyncio
 import base64
 import json
 import os
+import shutil
 from urllib import parse,request
 import zipfile
 from dataclasses import dataclass
@@ -72,7 +73,7 @@ class PriorityGet:
         self.version: str = ""
         self.cards: list[str] = []
 
-        config_path = os.path.join(data_path, "priority.json")
+        config_path = os.path.join(self.work_dir, "priority.json")
         if os.path.exists(config_path):
             try:
                 with open(config_path, "r", encoding="utf-8") as f:
@@ -163,20 +164,23 @@ class PriorityGet:
                 return  # 无法获取最新 YPK 地址
             latest_ver = latest_url.split("/")[-1].replace(".ypk", "") 
 
+        # 下载最新 YPK
+        ypk_path = await self.download(latest_url)
+        if not ypk_path:
+            return  # 下载失败
+
         # 清理工作目录
         os.makedirs(self.work_dir, exist_ok=True)
         for file in os.listdir(self.work_dir):
             file_path = os.path.join(self.work_dir, file)
             try:
-                os.remove(file_path)
+                if os.path.isdir(file_path):
+                    shutil.rmtree(file_path)
+                else:
+                    os.remove(file_path)
             except OSError:
                 pass
 
-        # 下载最新 YPK
-        ypk_path = await self.download(latest_url)
-        if not ypk_path:
-            return  # 下载失败
-        
         # 解压 YPK 文件
         new_cards = []
         try:
