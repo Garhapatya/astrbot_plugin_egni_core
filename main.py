@@ -13,7 +13,7 @@ from .src.pdf import PdfGenerator
 from .src.ygo import *
 
 import apscheduler
-import re
+
 
 @register("egni_core", "Garhapatya", "支持与提供qq机器人Egni-个性化服务的核心插件", "1.0.0")
 class EgniCore(Star):
@@ -36,39 +36,12 @@ class EgniCore(Star):
 
     # ── base tool ────────────────────────────────────────────────────────
 
-    def trans_json_to_chain(self, datas: dict) -> list[Comp.BaseMessageComponent]:
 
-        chain = []
-        plain = ""
 
-        for template_line in self.config["module"]["ygo"]["search_return"]:
-            line = template_line
-            if "${IMAGE}" in line:
-                chain.append(Comp.Plain(plain))
-                plain = ""
-                code = str(datas.get("id", "0"))
-                card = Card(code=code, path=self.deck_handle.cdn_url(code))
-                try:
-                    chain.append(Comp.Image.fromFileSystem(self.deck_handle.fetch_card_image_path(card)))
-                except Exception as e:
-                    plain += f"[图片加载失败: {code}]\n"
-            else:
-                line = re.sub(
-                    r'\$\{([^}]+)\}',
-                    lambda m: str(
-                                datas[m.group(1)]
-                                if m.group(1) in datas
-                                else datas[m.group(1).split(".")[0]][m.group(1).split(".")[1]]
-                                if "." in m.group(1)
-                                else ""
-                            ),
-                    line,
-                )
-                plain += line + "\n"
 
-        chain.append(Comp.Plain(plain))
+    # ── cron jobs ────────────────────────────────────────────────────────
 
-        return chain
+    
 
 
     # ── chat ─────────────────────────────────────────────────────────────
@@ -160,5 +133,11 @@ class EgniCore(Star):
         if not result:
             yield event.plain_result("未找到匹配的卡片。")
             return
-        yield event.chain_result(self.trans_json_to_chain(result[0]))
+        chain = []
+        for chain_line in self.deck_handle.trans_json_to_chain(result[0]):
+            if chain_line[0] == "Plain":
+                chain.append(Comp.Plain(chain_line[1]))
+            elif chain_line[0] == "Image":
+                chain.append(Comp.Image.fromFileSystem(chain_line[1]))
+        yield event.chain_result(chain)
         

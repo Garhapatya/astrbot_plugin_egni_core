@@ -7,7 +7,7 @@ from urllib import parse,request
 import zipfile
 from dataclasses import dataclass
 from typing import Callable
-
+import re
 
 @dataclass
 class Card:
@@ -231,6 +231,8 @@ class DeckHandle:
         self.data_path = data_path
         self.temp_path = temp_path
 
+        self.info_template: list[str] = config.get("search_return", [])
+
         self.priority = PriorityGet(self.data_path, self.temp_path)
 
     def get_image_path(self, code: str) -> str:
@@ -389,3 +391,36 @@ class DeckHandle:
             return [], 0
 
 
+    def trans_json_to_chain(self, datas: dict) -> list[tuple[str,str]]:
+
+        chain = []
+        plain = ""
+
+        for template_line in self.info_template:
+            line = template_line
+            if "${IMAGE}" in line:
+                chain.append(("Plain", plain))
+                plain = ""
+                code = str(datas.get("id", "0"))
+                card = Card(code=code, path=self.cdn_url(code))
+                try:
+                    chain.append(("Image", self.fetch_card_image_path(card)))
+                except Exception as e:
+                    plain += f"[图片加载失败: {code}]\n"
+            else:
+                line = re.sub(
+                    r'\$\{([^}]+)\}',
+                    lambda m: str(
+                                datas[m.group(1)]
+                                if m.group(1) in datas
+                                else datas[m.group(1).split(".")[0]][m.group(1).split(".")[1]]
+                                if "." in m.group(1)
+                                else ""
+                            ),
+                    line,
+                )
+                plain += line + "\n"
+
+        chain.append(("Plain", plain))
+
+        return chain
