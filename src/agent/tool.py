@@ -36,7 +36,7 @@ class card_search(FunctionTool[AstrAgentContext]):
     ) -> ToolExecResult:
         info: list[dict]
         next: int
-        info, next = self.deck_handle.search_card(query=kwargs.get("keywords", ""), start=kwargs.get("start", 0))
+        info, next = self.deck_handle.search_cards(query=kwargs.get("keywords", ""), start=kwargs.get("start", 0))
         infos = json.dumps(info, ensure_ascii=False, indent=0)
         return CallToolResult(content=[
             TextContent(type="text", text=f"本页查卡结果： {infos}"),
