@@ -8,6 +8,7 @@ import zipfile
 from dataclasses import dataclass
 from typing import Callable
 import re
+import datetime
 
 @dataclass
 class Card:
@@ -197,7 +198,7 @@ class PriorityGet:
         # 更新记录
         try:
             with open(os.path.join(self.work_dir, "priority.json"), "w", encoding="utf-8") as f:
-                json.dump({"ypk_ver": latest_ver, "cards": new_cards}, f, ensure_ascii=False, indent=4)
+                json.dump({"ypk_ver": latest_ver,"update_date": datetime.datetime.now().strftime("%Y-%m-%d-%H:%M:%S"), "cards": new_cards}, f, ensure_ascii=False, indent=4)
         except Exception:
             pass # 写入失败
         self.version = latest_ver
@@ -391,7 +392,7 @@ class DeckHandle:
             return [], 0
 
 
-    def trans_json_to_chain(self, datas: dict) -> list[tuple[str,str]]:
+    def trans_info_to_chain(self, datas: dict) -> list[tuple[str,str]]:
 
         chain = []
         plain = ""

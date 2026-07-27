@@ -8,11 +8,14 @@ from astrbot.api.event import AstrMessageEvent, filter
 from astrbot.api.star import Context, Star, register
 from astrbot.core.utils.astrbot_path import get_astrbot_data_path, get_astrbot_temp_path
 
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from apscheduler.triggers.cron import CronTrigger
+
+
 from .src.chat import RepeatHandler
 from .src.pdf import PdfGenerator
 from .src.ygo import *
 
-import apscheduler
 
 
 @register("egni_core", "Garhapatya", "支持与提供qq机器人Egni-个性化服务的核心插件", "1.0.0")
@@ -26,22 +29,7 @@ class EgniCore(Star):
         self.repeat_handler = RepeatHandler(self.config.get("module").get("repeat"))
         self.deck_handle = DeckHandle(self.config.get("module").get("ygo"), str(self.plugin_data_path), str(self.plugin_temp_path))
 
-    async def initialize(self):
-        await self.deck_handle.priority.update_priority()
-        logger.info("EgniCore plugin initialized successfully.")
-
-    async def terminate(self):
-        pass
-
-
-    # ── base tool ────────────────────────────────────────────────────────
-
-
-
-
-    # ── cron jobs ────────────────────────────────────────────────────────
-
-    
+        self.sched = AsyncIOScheduler()
 
 
     # ── chat ─────────────────────────────────────────────────────────────
@@ -134,10 +122,45 @@ class EgniCore(Star):
             yield event.plain_result("未找到匹配的卡片。")
             return
         chain = []
-        for chain_line in self.deck_handle.trans_json_to_chain(result[0]):
+        for chain_line in self.deck_handle.trans_info_to_chain(result[0]):
             if chain_line[0] == "Plain":
                 chain.append(Comp.Plain(chain_line[1]))
             elif chain_line[0] == "Image":
                 chain.append(Comp.Image.fromFileSystem(chain_line[1]))
         yield event.chain_result(chain)
         
+
+
+
+
+
+
+
+
+        
+    # ── scheduler ─────────────────────────────────────────────────────────────
+    def register_cron_job(self, cron: str, name: str, func , *args, **kwargs):
+        self.sched.add_job(
+                        func,
+                        CronTrigger.from_crontab(cron),
+                        args=args,
+                        kwargs=kwargs,
+                        name=name,
+                        id=name,
+                        replace_existing=True,
+                    )
+        
+
+
+    # ── lifecycle ─────────────────────────────────────────────────────────────
+
+    async def initialize(self):
+        self.sched.remove_all_jobs()
+        self.register_cron_job("0 22 * * *", "update_priority", self.deck_handle.priority.update_priority)
+        await self.deck_handle.priority.update_priority()
+        self.sched.start()
+        logger.info("EgniCore initialized successfully.")
+
+    async def terminate(self):
+        if self.sched.running:
+            self.sched.shutdown(wait=False)
