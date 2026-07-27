@@ -387,7 +387,7 @@ class DeckHandle:
             )
             resp = request.urlopen(req, timeout=15)
             data = json.loads(resp.read())
-            return data.get("result", []), data.get("next")
+            return data.get("result", []), data.get("next", 0)
         except Exception:
             return [], 0
 

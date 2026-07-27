@@ -14,6 +14,7 @@ from apscheduler.triggers.cron import CronTrigger
 
 from .src.chat import RepeatHandler
 from .src.pdf import PdfGenerator
+from .src.agent import CardSearch
 from .src.ygo import *
 
 
@@ -28,6 +29,10 @@ class EgniCore(Star):
         self.config: Any = config
         self.repeat_handler = RepeatHandler(self.config.get("module").get("repeat"))
         self.deck_handle = DeckHandle(self.config.get("module").get("ygo"), str(self.plugin_data_path), str(self.plugin_temp_path))
+
+        self.context.add_llm_tools(
+            CardSearch(deck_handle=self.deck_handle)
+        )
 
         self.sched = AsyncIOScheduler()
 
@@ -117,7 +122,7 @@ class EgniCore(Star):
     @filter.command("查卡")
     async def search_card(self, event: AstrMessageEvent, input: str):
         """查询卡片信息"""
-        result,weight = self.deck_handle.search_cards(input)
+        result, next = self.deck_handle.search_cards(input)
         if not result:
             yield event.plain_result("未找到匹配的卡片。")
             return
