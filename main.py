@@ -31,7 +31,8 @@ class EgniCore(Star):
         self.deck_handle = DeckHandle(self.config.get("module").get("ygo"), str(self.plugin_data_path), str(self.plugin_temp_path))
 
         self.context.add_llm_tools(
-            CardSearch(deck_handle=self.deck_handle)
+            CardSearch(deck_handle=self.deck_handle),
+            CardDesc(deck_handle=self.deck_handle)
         )
 
         self.sched = AsyncIOScheduler()

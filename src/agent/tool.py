@@ -74,7 +74,7 @@ class card_search(FunctionTool[AstrAgentContext]):
 
 
 @dataclass
-class dcard_desc(FunctionTool[AstrAgentContext]):
+class card_desc(FunctionTool[AstrAgentContext]):
     name: str = "card_desc"
     description: str = "检索固定卡密（卡片id）所对应卡的完整效果"
     parameters: dict = Field(
