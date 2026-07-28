@@ -14,7 +14,7 @@ from apscheduler.triggers.cron import CronTrigger
 
 from .src.chat import RepeatHandler
 from .src.pdf import PdfGenerator
-from .src.agent import CardSearch
+from .src.agent import *
 from .src.ygo import *
 
 

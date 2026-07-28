@@ -2,7 +2,6 @@ from pydantic import Field
 from pydantic.dataclasses import dataclass
 from typing import Any
 import json
-from mcp.types import TextContent, CallToolResult
 
 from astrbot.core.agent.run_context import ContextWrapper
 from astrbot.core.agent.tool import FunctionTool, ToolExecResult
@@ -11,34 +10,60 @@ from astrbot.core.astr_agent_context import AstrAgentContext
 
 @dataclass
 class card_search(FunctionTool[AstrAgentContext]):
-    name: str = "card_search"  # 工具名称
-    description: str = "一个提供游戏王卡片搜索并输出卡片详细信息的工具，输出结果包含一个json格式的字符串提供本页搜索结果，和一个标识下一页起始位置的数字"  # 工具描述
+    name: str = "card_search"
+    description: str = "搜索游戏王卡片，返回卡片信息（自动翻页聚合）"
     parameters: dict = Field(
         default_factory=lambda: {
             "type": "object",
             "properties": {
                 "keywords": {
                     "type": "string",
-                    "description": "搜索卡片的关键词，需要符合基本的精确搜索逻辑。\n内容可以是卡名、卡密、卡片种类、卡片种族/属性/等级/攻/守，卡片效果等。\n关键词用于填入apiurl，不能出现违法URL语法的字符",
-                },
-                "start": {
-                    "type": "integer",
-                    "description": "搜索结果的起始位置，0则表示表示从第一页开始，通过填入上一次调用此工具得到的输出中标识下一页起始位置的数字来获取下一页",
+                    "description": "搜索关键词：卡名/卡密/效果等",
                 },
             },
-            "required": ["keywords", "start"],
+            "required": ["keywords"],
         }
     )
     deck_handle: Any = None
-    
+
+    def filter(self, info:list[dict[str, Any]]) -> list[dict[str, Any]]:
+        """过滤掉不必要的字段"""
+        filtered_info = []
+        for card in info:
+            filtered_card = {
+                "code": card.get("id"),
+                "卡名": card.get("cn_name"),
+                "官方翻译": card.get("sc_name"),
+                "大师决斗翻译": card.get("md_name"),
+                "NW翻译": card.get("nwbbs_n"),
+                "CNOCG翻译": card.get("cnocg_n"),
+                "日文读音": card.get("jp_ruby"),
+                "日文名": card.get("jp_name"),
+                "英文名": card.get("en_name"),
+                "卡片类型": card.get("text", {}).get("types"),
+                "灵摆效果": card.get("text", {}).get("pdesc"),
+                "效果": card.get("text", {}).get("desc"),
+                "关联卡片": card.get("html", {}).get("refer"),
+            }
+            filtered_info.append(filtered_card)
+        return filtered_info
+
     async def call(
         self, context: ContextWrapper[AstrAgentContext], **kwargs
     ) -> ToolExecResult:
-        info: list[dict]
-        next: int
-        info, next = self.deck_handle.search_cards(query=kwargs.get("keywords", ""), start=kwargs.get("start", 0))
-        infos = json.dumps(info, ensure_ascii=False, indent=0)
-        return CallToolResult(content=[
-            TextContent(type="text", text=f"本页查卡结果： {infos}"),
-            TextContent(type="text", text=f"下一页查卡起始位置(输出0则无下页)： {next}"),
-        ])
+        query = kwargs.get("keywords", "")
+        all_cards: list[dict] = []
+        start = 0
+        max_pages = 3
+
+        for _ in range(max_pages):
+            page, next_start = self.deck_handle.search_cards(
+                query=query, start=start
+            )
+            all_cards.extend(page)
+            if not next_start:
+                break
+            start = next_start
+
+        all_cards = self.filter(all_cards)
+        return json.dumps(all_cards, ensure_ascii=False, separators=(",", ":"))
