@@ -11,7 +11,7 @@ from astrbot.core.astr_agent_context import AstrAgentContext
 @dataclass
 class card_search(FunctionTool[AstrAgentContext]):
     name: str = "card_search"
-    description: str = "游戏王卡片查询，返回卡片摘要信息（自动翻页聚合），未成功精确匹配的搜索结果的效果文本会被截断在20字以内"
+    description: str = "游戏王卡片查询，返回卡片信息（自动翻页聚合）"
     parameters: dict = Field(
         default_factory=lambda: {
             "type": "object",
@@ -41,8 +41,8 @@ class card_search(FunctionTool[AstrAgentContext]):
                 "日文名": card.get("jp_name"),
                 "英文名": card.get("en_name"),
                 "卡片类型": card.get("text", {}).get("types"),
-                "灵摆效果": card.get("text", {}).get("pdesc", "")[:20 if card.get("weight", 0) < 90 else None],
-                "效果": card.get("text", {}).get("desc", "")[:20 if card.get("weight", 0) < 90 else None],
+                "灵摆效果": card.get("text", {}).get("pdesc"),
+                "效果": card.get("text", {}).get("desc"),
                 "关联卡片": card.get("html", {}).get("refer"),
             }
             filtered_info.append(filtered_card)
@@ -68,52 +68,3 @@ class card_search(FunctionTool[AstrAgentContext]):
         all_cards = self.filter(all_cards)
         return json.dumps(all_cards, ensure_ascii=False, separators=(",", ":"))
     
-
-
-
-
-
-@dataclass
-class card_desc(FunctionTool[AstrAgentContext]):
-    name: str = "card_desc"
-    description: str = "检索固定卡密（卡片id）所对应卡的完整效果"
-    parameters: dict = Field(
-        default_factory=lambda: {
-            "type": "object",
-            "properties": {
-                "code": {
-                    "type": "string",
-                    "description": "卡片卡密(id), 例如：10000000",
-                },
-            },
-            "required": ["code"],
-        }
-    )
-    deck_handle: Any = None
-
-    def filter(self, info:dict[str, Any]) -> dict[str, Any]:
-        """过滤掉不必要的字段"""
-
-        filtered_info = {
-            "卡密": info.get("id"),
-            "卡名": info.get("cn_name"),
-
-            "灵摆效果": info.get("text", {}).get("pdesc", ""),
-            "效果": info.get("text", {}).get("desc", ""),
-        }
-
-        return filtered_info
-
-    async def call(
-        self, context: ContextWrapper[AstrAgentContext], **kwargs
-    ) -> ToolExecResult:
-        code = kwargs.get("code", "0")
-
-
-        info = self.deck_handle.fetch_card_info(
-                code=code
-            )
-
-
-        info = self.filter(info)
-        return json.dumps(info, ensure_ascii=False, separators=(",", ":"))
