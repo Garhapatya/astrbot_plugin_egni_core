@@ -336,26 +336,6 @@ class DeckHandle:
                 f.write(img_bytes)
         return tmp
 
-    def fetch_card_name(self, code: str) -> str:
-        """通过百鸽 API 查询卡片的中文名称。
-
-        Args:
-            code: 卡片 passcode。
-
-        Returns:
-            中文卡片名称，API 不可用时返回 'Unknown Card ({code})'。
-        """
-        try:
-            url = self.card_info_url(code)
-            req = request.Request(
-                url, headers={"User-Agent": "AstrBot-EgniCore/1.0"}
-            )
-            resp = request.urlopen(req, timeout=15)
-            data = json.loads(resp.read())
-            return data["text"]["name"]
-        except Exception:
-            return f"Unknown Card ({code})"
-
     def fetch_card_info(self, code: str) -> dict | None:
         """通过百鸽 API 查询卡片的完整信息。
 
