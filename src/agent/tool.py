@@ -11,7 +11,7 @@ from astrbot.core.astr_agent_context import AstrAgentContext
 @dataclass
 class card_search(FunctionTool[AstrAgentContext]):
     name: str = "card_search"
-    description: str = "搜索游戏王卡片，返回卡片信息（自动翻页聚合），效果字段只保留前100个字符，灵摆效果字段只保留前100个字符"
+    description: str = "搜索游戏王卡片，返回卡片摘要信息（自动翻页聚合），未成功精确匹配的搜索结果的效果文本会被截断在50字以内"
     parameters: dict = Field(
         default_factory=lambda: {
             "type": "object",
@@ -41,8 +41,8 @@ class card_search(FunctionTool[AstrAgentContext]):
                 "日文名": card.get("jp_name"),
                 "英文名": card.get("en_name"),
                 "卡片类型": card.get("text", {}).get("types"),
-                "灵摆效果": card.get("text", {}).get("pdesc", "")[:100],
-                "效果": card.get("text", {}).get("desc", "")[:100],
+                "灵摆效果": card.get("text", {}).get("pdesc", "")[:50 if card.get("weight", 0) < 90 else None],
+                "效果": card.get("text", {}).get("desc", "")[:50 if card.get("weight", 0) < 90 else None],
                 "关联卡片": card.get("html", {}).get("refer"),
             }
             filtered_info.append(filtered_card)
@@ -82,7 +82,7 @@ class card_desc(FunctionTool[AstrAgentContext]):
             "type": "object",
             "properties": {
                 "code": {
-                    "type": "integer",
+                    "type": "string",
                     "description": "卡片卡密(id), 例如：10000000",
                 },
             },
