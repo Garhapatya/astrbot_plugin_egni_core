@@ -11,14 +11,14 @@ from astrbot.core.astr_agent_context import AstrAgentContext
 @dataclass
 class card_search(FunctionTool[AstrAgentContext]):
     name: str = "card_search"
-    description: str = "搜索游戏王卡片，返回卡片摘要信息（自动翻页聚合），未成功精确匹配的搜索结果的效果文本会被截断在20字以内"
+    description: str = "游戏王卡片查询，返回卡片摘要信息（自动翻页聚合），未成功精确匹配的搜索结果的效果文本会被截断在20字以内"
     parameters: dict = Field(
         default_factory=lambda: {
             "type": "object",
             "properties": {
                 "keywords": {
                     "type": "string",
-                    "description": "搜索关键词：卡名/卡密/效果，不支持空格分割，每次查询只传入一个关键词",
+                    "description": "搜索匹配关键词：使用卡名/卡密/效果/面板，每次查询只能传入一词，不能混合，不能空格分割",
                 },
             },
             "required": ["keywords"],
